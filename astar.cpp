@@ -4,15 +4,11 @@
 #include "solver.hpp"
 #include <queue>
 
-typedef struct {
+struct Node {
     std::string state;
+    Node *parent;
     int h;
     int g;
-} Node;
-
-class compare
-{
-public:
     bool operator()(Node &a, Node &b) {
         return (a.h+a.g)>(b.g+b.h);
     }
@@ -22,28 +18,29 @@ class AStar : public Solver
 {
 public:
     AStar();
-    //AStar(AStar &&) = default;
-    //AStar(const AStar &) = default;
-    //AStar &operator=(AStar &&) = default;
-    //AStar &operator=(const AStar &) = default;
+    AStar(int rows, int cols);
+    void buildHistory(Node *path);
     void solve(std::string iniState);
     int heuristic(std::string state);
-    void search(Node root);
+    Node search(Node *root);
     std::pair<int, int> findPosInMatrix(std::vector<std::vector<char>> matrix, char c);
-    //~AStar();
+    ~AStar();
     
 private:
-    std::priority_queue<Node, std::vector<Node>, compare> pqueue;
+    std::priority_queue<Node, std::vector<Node>, Node> pqueue;
 };
 
-AStar::AStar()
-{
-}
+AStar::AStar() {}
+AStar::AStar(int rows, int cols) : Solver(rows, cols) {}
+
+AStar::~AStar() {}
+
 
 void AStar::solve(std::string iniState) {
-    Node root;
-    root.state = iniState;
-    search(root); 
+    Node *root = new Node;
+    root->state = iniState;
+    Node path = search(root); 
+    printHistory();
 }
 
 std::pair<int, int> AStar::findPosInMatrix(std::vector<std::vector<char>> matrix, char c) {
@@ -54,42 +51,53 @@ std::pair<int, int> AStar::findPosInMatrix(std::vector<std::vector<char>> matrix
     } return {-1, -1};
 }
 
-void AStar::search(Node root) {
-    root.h = heuristic(root.state);
-    root.g = 1;
-    pqueue.push(root);
-    std::cout<<pqueue.top().h<<"\n";
-    //std::vector<std::string> nextMvs = getPossibleMovments(pqueue.top().state);
-    //for(auto mv: nextMvs) {
-    //    Node curr;
-    //    curr.state = mv;
-    //    std::cout<<heuristic(curr)<<"\n";
-    //    std::cout<<mv<<"\n";
-    //}
-    //return;
+void AStar::buildHistory(Node *path) {
+    while (path != nullptr)
+    {
+        history.push_back(path->state);
+        path = path->parent;
+    } 
+}
+
+
+Node AStar::search(Node *root) {
+    root->h = heuristic(root->state);
+    root->g = 1;
+    root->parent = nullptr;
+    pqueue.push(*root);
+    //std::cout<<pqueue.top().h<<"\n";
     while (!pqueue.empty())
     {
-        //std::cout<<pqueue.top().h<<"\n";
-        std::cout<<pqueue.top().state<<"\n";
-        Node parent = pqueue.top();
-        if(pqueue.top().state == ans) break;
-        std::vector<std::string> nextMvs = getPossibleMovments(pqueue.top().state);
+        Node *current = new Node;
+        current->parent = pqueue.top().parent;
+        current->state = pqueue.top().state;
+        current->g = pqueue.top().g;
+        current->h = pqueue.top().h;
+        if(current->state == ans) break;
+        std::vector<std::string> nextMvs = getPossibleMovments(current->state);
+
+        // pop current node
         pqueue.pop();
+
         //std::cout<<"Next moves: "<<"\n";
         for(auto move : nextMvs) {
-            Node current; 
-            current.state = move;
-            current.h = heuristic(move);
-            current.g = parent.g+1;
-            //std::cout<<current.state<<"\n";
+            Node *child = new Node; 
+            child->parent = current;
+            child->state = move;
+            child->h = heuristic(move);
+            child->g = current->g+1;
+            //std::cout<<child.parent<<"\n";
             //std::cout<<current.h<<"\n";
-            pqueue.push(current);
+            pqueue.push(*child);
         }
         //std::cout<<"--------------------"<<"\n";
     }
+    Node end = pqueue.top();
+    buildHistory(&end);
+    return pqueue.top();
 }
 
-// Using manhattan distance for each item in matrix
+// Calculate manhattan distance for each item in matrix
 int AStar::heuristic(std::string state) {
     std::vector<std::vector<char>> curMatrix = getMatrixFromString(state);
     //std::vector<std::vector<char>> target = getMatrixFromString("123456780");
@@ -109,22 +117,13 @@ int AStar::heuristic(std::string state) {
     return value;
 }
 
-void testHeuristic() {
-    //Node n1, n2, n3;
-    //n1.state = "012345678";
-    //n2.state = "012435678";
-    //n3.state = "012354687";
-    //std::cout<<solv.heuristic(n1)<<"\n";
-    //std::cout<<solv.heuristic(n2)<<"\n";
-    //std::cout<<solv.heuristic(n3)<<"\n";
-}
-
 int main (int argc, char *argv[])
 {
     auto start = std::chrono::high_resolution_clock::now();
     AStar solv; 
     //std::cout<<solv.heuristic("125306748")<<"\n";
-    solv.solve("012534678");
+    //solv.solve("012534678");
+    solv.solve("386205741");
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
     std::cout<<"Execution time: "<<duration.count()<<" seconds"<<"\n";
