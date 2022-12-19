@@ -3,7 +3,7 @@ CXX= g++
 CXXFLAGS= -g -Wall
 
 start:
-	$(CXX) $(CXXFLAGS) main.cpp limiteddfs.cpp -o main
+	$(CXX) $(CXXFLAGS) main.cpp astar.cpp -o main
 
 clean:
 	rm -f main *out
