@@ -36,8 +36,8 @@ public:
     }
 
     void printMatrix(stateMat state) {
-          for (int i = 0; i < state.size(); i++) {
-              for (int j = 0; j < state[i].size(); j++) {
+          for (size_t i = 0; i < state.size(); i++) {
+              for (size_t j = 0; j < state[i].size(); j++) {
                     std::cout<<state[i][j]<<" ";
               }
               std::cout<<"\n";
@@ -45,8 +45,8 @@ public:
     }
 
     bool isGoal(stateMat state, stateMat goal) {
-        for (int i = 0; i < state.size(); i++) {
-            for (int j = 0; j < state[0].size(); j++) {
+        for (size_t i = 0; i < state.size(); i++) {
+            for (size_t j = 0; j < state[0].size(); j++) {
                 if(state[i][j] != goal[i][j]) return false;
             }
         }

@@ -1,6 +1,6 @@
 
 CXX= g++
-CXXFLAGS= -g -Wall
+CXXFLAGS= -O3 -Wall
 
 start:
 	$(CXX) $(CXXFLAGS) main.cpp astar.cpp -o main

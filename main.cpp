@@ -45,8 +45,8 @@ int main (int argc, char *argv[])
     solv.solve(iniState);
 
     auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-    std::cout<<"Execution time: "<<duration.count()<<" seconds"<<"\n";
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+    std::cout<<"Execution time: "<<duration.count()<<" milliseconds"<<"\n";
 
     return 0;
 }
